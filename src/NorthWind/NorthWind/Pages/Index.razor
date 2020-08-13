@@ -1,0 +1,32 @@
+﻿@page "/"
+@inject HttpClient HttpClient
+
+<h1>NorthWind on GitHub</h1>
+<Select Items="Categories"
+        DataTextField="CategoryName"
+        DefaultOptionText="All products"
+        OnChange="(Category c) => GetProducts(c)"
+        style="width:200px"
+        />
+<Table Items="Products"/>
+
+@code{
+    IEnumerable<Category> Categories;
+    IEnumerable<Product> Products;
+
+    string NorthWindBaseUrl = "https://ticapacitacion.com/webapi/northwind/";
+
+    protected async override Task OnInitializedAsync()
+    {
+        Categories = await HttpClient.GetFromJsonAsync<IEnumerable<Category>>(
+            $"{NorthWindBaseUrl}categories");
+    }
+
+    async Task GetProducts(Category category)
+    {
+        string Endpoint = category == null ? "products" :
+            $"products/bycategoryid/{category.CategoryID}";
+        Products = await HttpClient.GetFromJsonAsync<IEnumerable<Product>>(
+            $"{NorthWindBaseUrl}{Endpoint}");
+    }
+}
